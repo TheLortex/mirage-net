@@ -18,20 +18,23 @@
  *)
 
 module Net = struct
-  type error = [ `Invalid_length ]
-  let pp_error ppf = function
-    | `Invalid_length -> Fmt.string ppf "invalid length (exceeds size)"
+  type Error.t += Invalid_length
+
+  let () =
+    Error.register_printer ~id:"network" ~title:"Network" ~pp:(function
+      | Invalid_length -> Some Fmt.(any "Invalid length")
+      | _ -> None)
 end
 
 type stats = {
-  mutable rx_bytes: int64;
-  mutable rx_pkts: int32;
-  mutable tx_bytes: int64;
-  mutable tx_pkts: int32;
+  mutable rx_bytes : int64;
+  mutable rx_pkts : int32;
+  mutable tx_bytes : int64;
+  mutable tx_pkts : int32;
 }
 
 module Stats = struct
-  let create () = { rx_pkts=0l; rx_bytes=0L; tx_pkts=0l; tx_bytes=0L }
+  let create () = { rx_pkts = 0l; rx_bytes = 0L; tx_pkts = 0l; tx_bytes = 0L }
 
   let rx t size =
     t.rx_pkts <- Int32.succ t.rx_pkts;
@@ -43,20 +46,19 @@ module Stats = struct
 
   let reset t =
     t.rx_bytes <- 0L;
-    t.rx_pkts  <- 0l;
+    t.rx_pkts <- 0l;
     t.tx_bytes <- 0L;
-    t.tx_pkts  <- 0l
+    t.tx_pkts <- 0l
 end
 
 module type S = sig
-  type error = private [> Net.error ]
-  val pp_error: error Fmt.t
   type t
-  val disconnect : t -> unit Lwt.t
-  val write: t -> size:int -> (Cstruct.t -> int) -> (unit, error) result Lwt.t
-  val listen: t -> header_size:int -> (Cstruct.t -> unit Lwt.t) -> (unit, error) result Lwt.t
-  val mac: t -> Macaddr.t
-  val mtu: t -> int
-  val get_stats_counters: t -> stats
-  val reset_stats_counters: t -> unit
+
+  val disconnect : t -> unit
+  val write : t -> size:int -> (Cstruct.t -> int) -> unit Error.r
+  val listen : t -> header_size:int -> (Cstruct.t -> unit) -> unit Error.r
+  val mac : t -> Macaddr.t
+  val mtu : t -> int
+  val get_stats_counters : t -> stats
+  val reset_stats_counters : t -> unit
 end
