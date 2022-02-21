@@ -24,7 +24,7 @@
     {e Release %%VERSION%% } *)
 
 module Net : sig
-  type Error.t += Invalid_length  (** The type for IO operation errors *)
+  type Error.t += Invalid_length of int  (** The type for IO operation errors *)
 end
 
 type stats = {

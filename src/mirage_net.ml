@@ -18,11 +18,11 @@
  *)
 
 module Net = struct
-  type Error.t += Invalid_length
+  type Error.t += Invalid_length of int
 
   let () =
     Error.register_printer ~id:"network" ~title:"Network" ~pp:(function
-      | Invalid_length -> Some Fmt.(any "Invalid length")
+      | Invalid_length s -> Some Fmt.(const (fmt "Invalid length %d") s)
       | _ -> None)
 end
 
