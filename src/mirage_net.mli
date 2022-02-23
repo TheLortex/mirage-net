@@ -46,7 +46,7 @@ module type S = sig
   (** Disconnect from the network device. While this might take some time to
       complete, it can never result in an error. *)
 
-  val write : t -> size:int -> (Cstruct.t -> int) -> unit Error.r
+  val writev : t -> Cstruct.t list -> unit Error.r
   (** [write net ~size fill] allocates a buffer of length [size], where [size]
      must not exceed the interface maximum packet size ({!mtu} plus Ethernet
      header). The allocated buffer is zeroed and passed to the [fill] function

@@ -55,7 +55,7 @@ module type S = sig
   type t
 
   val disconnect : t -> unit
-  val write : t -> size:int -> (Cstruct.t -> int) -> unit Error.r
+  val writev : t -> Cstruct.t list -> unit Error.r
   val listen : t -> header_size:int -> (Cstruct.t -> unit) -> unit Error.r
   val mac : t -> Macaddr.t
   val mtu : t -> int
