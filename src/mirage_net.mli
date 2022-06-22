@@ -24,7 +24,7 @@
     {e Release %%VERSION%% } *)
 
 module Net : sig
-  type Error.t += Invalid_length of int  (** The type for IO operation errors *)
+  exception Invalid_length of int
 end
 
 type stats = {
@@ -46,15 +46,17 @@ module type S = sig
   (** Disconnect from the network device. While this might take some time to
       complete, it can never result in an error. *)
 
-  val writev : t -> Cstruct.t list -> unit Error.r
+  val writev : t -> Cstruct.t list -> unit
   (** [write net ~size fill] allocates a buffer of length [size], where [size]
      must not exceed the interface maximum packet size ({!mtu} plus Ethernet
      header). The allocated buffer is zeroed and passed to the [fill] function
      which returns the payload length, which may not exceed the length of the
      buffer. When [fill] returns, a sub buffer is put on the wire: the allocated
-     buffer from index 0 to the returned length. *)
+     buffer from index 0 to the returned length.
+     
+     Can raise Invalid_length *)
 
-  val listen : t -> header_size:int -> (Cstruct.t -> unit) -> unit Error.r
+  val listen : t -> header_size:int -> (Cstruct.t -> unit) -> unit
   (** [listen ~header_size net fn] waits for a [packet] with size at most
      [header_size + mtu] on the network device. When a [packet] is received, an
      asynchronous task is created in which [fn packet] is called. The ownership

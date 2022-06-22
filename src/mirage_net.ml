@@ -18,12 +18,7 @@
  *)
 
 module Net = struct
-  type Error.t += Invalid_length of int
-
-  let () =
-    Error.register_printer ~id:"network" ~title:"Network" ~pp:(function
-      | Invalid_length s -> Some Fmt.(const (fmt "Invalid length %d") s)
-      | _ -> None)
+  exception Invalid_length of int
 end
 
 type stats = {
@@ -55,8 +50,8 @@ module type S = sig
   type t
 
   val disconnect : t -> unit
-  val writev : t -> Cstruct.t list -> unit Error.r
-  val listen : t -> header_size:int -> (Cstruct.t -> unit) -> unit Error.r
+  val writev : t -> Cstruct.t list -> unit
+  val listen : t -> header_size:int -> (Cstruct.t -> unit) -> unit
   val mac : t -> Macaddr.t
   val mtu : t -> int
   val get_stats_counters : t -> stats
